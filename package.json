@@ -1,5 +1,5 @@
 {
-  "name": "@chan/tailwindcss-jit-px-to-rem",
+  "name": "tailwindcss-jit-px-to-rem",
   "version": "1.0.0",
   "description": "Tailwind Css plugin convert dynamic classes from px to rem.",
   "main": "dist/index.js",
