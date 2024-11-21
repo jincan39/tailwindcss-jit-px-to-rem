@@ -46,13 +46,41 @@ type CacheUtils = {
 }
 
 const CACHE_CONFIG: CacheConfig = {
-  FILE_PATH: path.join(__dirname, '.tailwind-utilities-cache.json'),
+  FILE_PATH: '',
   moduleCache: null
 };
+
+const getMainPath = (): string | undefined => {
+  try {
+    const possibleConfigFiles = ['tailwind.config.js', 'tailwind.config.ts'];
+    let currentDir = process.cwd();
+
+    while (currentDir !== path.parse(currentDir).root) {
+      for (const configFile of possibleConfigFiles) {
+        const configPath = path.join(currentDir, configFile);
+        if (fs.existsSync(configPath)) {
+          return currentDir;
+        }
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    return process.cwd();
+  } catch (error) {
+    return process.cwd();
+  }
+};
+
+let cachedMainPath: string | undefined;
+cachedMainPath = getMainPath();
+CACHE_CONFIG.FILE_PATH = cachedMainPath
+  ? path.join(cachedMainPath, '.tailwind-utilities-cache.json')
+  : '';
 
 const cacheUtils: CacheUtils = {
   read: () => {
     if (CACHE_CONFIG.moduleCache) return CACHE_CONFIG.moduleCache;
+    if (!CACHE_CONFIG.FILE_PATH) return null;
 
     try {
       if (fs.existsSync(CACHE_CONFIG.FILE_PATH)) {
@@ -65,13 +93,15 @@ const cacheUtils: CacheUtils = {
       try {
         fs.unlinkSync(CACHE_CONFIG.FILE_PATH);
       } catch (e) {
-        // todo
+        // ignore
       }
     }
     return null;
   },
 
   write: (data) => {
+    if (!CACHE_CONFIG.FILE_PATH) return;
+
     try {
       fs.writeFileSync(CACHE_CONFIG.FILE_PATH, JSON.stringify(data));
       CACHE_CONFIG.moduleCache = data;
@@ -82,10 +112,12 @@ const cacheUtils: CacheUtils = {
 
   getKey: () => {
     try {
-      return git.short();
+      const mainPath = getMainPath();
+      const mainDir = path.dirname(mainPath);
+      return git.short(mainDir);
     } catch (error) {
       const packageJson = JSON.parse(
-        fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')
+        fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8')
       );
       return packageJson.version;
     }

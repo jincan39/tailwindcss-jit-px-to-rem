@@ -1,6 +1,6 @@
 {
   "name": "tailwindcss-jit-px-to-rem",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tailwind Css plugin convert dynamic classes from px to rem.",
   "main": "dist/index.js",
   "repository": "https://github.com/jincan39/tailwindcss-jit-px-to-rem",
@@ -14,7 +14,7 @@
     "tailwindcss-plugin"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "watch": "tsc --watch",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
